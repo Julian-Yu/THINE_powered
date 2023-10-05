@@ -9,10 +9,11 @@ import sys
 num_walks_per_node = 10
 walk_length = 8
 
+
 class aminer_metapath:
     def __init__(self, args):
         self.args = args
-        self.data_path = './input/Aminer/'
+        self.data_path = '../data/Aminer/'
         self.coauthor_time_path = 'Coauthor_Time_temp.txt'
         self.paper_information_path = 'Paper_Information_temp.txt'
         self.conference_id_path = 'Venue_Id_temp.txt'
@@ -31,7 +32,7 @@ class aminer_metapath:
         self.node_dim = {}
 
         self.train_edges = {}  # {node id: {node id: time, ...}, ...}
-        self.output_metapath = dict() # {type: [metapath, ...], ...}, metapath = {id: , edge: [], node_type: [],time: []}
+        self.output_metapath = dict()  # {type: [metapath, ...], ...}, metapath = {id: , edge: [], node_type: [],time: []}
         self.output_metapath['1'] = []
         self.output_metapath['2'] = []
         self.output_metapath['3'] = []
@@ -59,10 +60,10 @@ class aminer_metapath:
         self.train_edges = result_tr_ed
 
     def reading_data(self):
-        self.conference_id_dict = {}   # dict : {conforence : id , ... }
+        self.conference_id_dict = {}  # dict : {conforence : id , ... }
         with open(self.data_path + self.conference_id_path, encoding='utf-8') as f:
             data_line = f.readline()
-            while(data_line):
+            while (data_line):
                 self.conference_num = self.conference_num + 1
                 data_line = data_line.split()
                 self.conference_id_dict[data_line[0]] = data_line[1]
@@ -90,18 +91,18 @@ class aminer_metapath:
                         self.author_paper_time_dict[author_id] = []
                     self.paper_author_time_dict[paper_id].append(paper_author_time_temp)
                     self.author_paper_time_dict[author_id].append(author_paper_time_temp)
-                    self.to_train_edge(paper_id, 'paper', author_id, 'author', time)
-                    self.to_train_edge(author_id, 'author', paper_id, 'paper', time)
+                    self.to_train_edge(s_node=paper_id, s_type='paper', t_node=author_id, t_type='author', time=time)
+                    self.to_train_edge(s_node=author_id, s_type='author', t_node=paper_id, t_type='paper', time=time)
 
                 data_line = f.readline()
             self.node_dim['author'] = 10206
 
         self.paper_conference_time_dict = {}  # [ [paper id, conference id, time], ...]
         self.conference_paper_time_dict = {}  # [ [conference id, paper id, time], ...]
-        self.paper_paper_time_dict = {}   # [ [paper id, paper id, time], ...]
+        self.paper_paper_time_dict = {}  # [ [paper id, paper id, time], ...]
         with open(self.data_path + self.paper_information_path, encoding='utf-8') as f:
             data_line = f.readline()
-            while(data_line):
+            while (data_line):
                 self.paper_num = self.paper_num + 1
                 data_line = data_line.split()
                 paper_id = data_line[0]
@@ -151,6 +152,7 @@ class aminer_metapath:
         object_start = 'self.'
         object_end = '_time_dict'
         metapath_temp = dict()
+        metapath_temp['id'] = '0'
         metapath_temp['edge'] = []
         metapath_temp['node_type'] = []
         metapath_temp['time'] = []
@@ -163,8 +165,9 @@ class aminer_metapath:
             random_temp = random.choice(eval(object_start + edge_type[i] + object_end)[metapath_temp['edge'][-1]])
             if i != len(edge_type) - 1:
                 num_break = 0
-                while (random_temp[0] not in (eval(object_start + edge_type[i + 1] + object_end)).keys()):
-                    random_temp = random.choice(eval(object_start + edge_type[i] + object_end)[metapath_temp['edge'][-1]])
+                while random_temp[0] not in (eval(object_start + edge_type[i + 1] + object_end)).keys():
+                    random_temp = random.choice(
+                        eval(object_start + edge_type[i] + object_end)[metapath_temp['edge'][-1]])
                     num_break = num_break + 1
                     if num_break >= 10:
                         random_temp = 'NONE'
@@ -199,7 +202,7 @@ class aminer_metapath:
                     if metapath_temp['edge'][0] == 'NONE':
                         break
                     metapath_temp['id'] = str(metapath_id)
-                    metapath_id = metapath_id + 1
+                    metapath_id += 1
                     self.output_metapath[metapath_type_key].append(metapath_temp)
 
     def get_edge_type(self):

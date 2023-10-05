@@ -37,7 +37,7 @@ def parameter_parser():
                         help="True : metapath, False : metapath++")
 
     parser.add_argument('--node_similarity_method',
-                        default=False,
+                        default=True,
                         type=bool,
                         help="True : matrix similarity, False : Euclidean distance")
 

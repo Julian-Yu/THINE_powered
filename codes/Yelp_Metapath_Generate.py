@@ -10,10 +10,11 @@ import sys
 num_walks_per_node = 10
 walk_length = 8
 
+
 class yelp_metapath:
     def __init__(self, args):
         self.args = args
-        self.data_path = './input/Yelp/'
+        self.data_path = '../data/Yelp/'
         self.input_file = 'user_business_star_time.txt'
 
         self.metapath_type = dict()
@@ -35,7 +36,7 @@ class yelp_metapath:
         # print(self.metapath_type)
 
         self.train_edges = {}  # {node id: {node id: time, ...}, ...}
-        self.output_metapath = dict() # {type: [metapath, ...], ...}, metapath = {id: , edge: [], node_type: [],time: []}
+        self.output_metapath = dict()  # {type: [metapath, ...], ...}, metapath = {id: , edge: [], node_type: [],time: []}
         self.output_metapath['1'] = []
         self.output_metapath['2'] = []
         self.output_metapath['3'] = []
@@ -118,17 +119,20 @@ class yelp_metapath:
         self.node_dim['star'] = len(self.star_business_time_dict.keys())
         self.node_dim['user'] = 24586
 
-    def to_time(self, str_time):
+    @staticmethod
+    def to_time(str_time):
         str_time = str_time.split('-')
         time = (int(str_time[0]))
         # time = time + (int(str_time[1]) - 1) / 100
         # time = time + int(str_time[2]) / 10000
         return str(time)
 
-    def random_walk(self, node_start, edge_type):
+    @staticmethod
+    def random_walk(node_start, edge_type):
         object_start = 'self.'
         object_end = '_time_dict'
         metapath_temp = dict()
+        metapath_temp['id'] = '0'
         metapath_temp['edge'] = []
         metapath_temp['node_type'] = []
         metapath_temp['time'] = []
@@ -143,7 +147,8 @@ class yelp_metapath:
             if i != len(edge_type) - 1:
                 num_break = 0
                 while (random_temp[0] not in (eval(object_start + edge_type[i + 1] + object_end)).keys()):
-                    random_temp = random.choice(eval(object_start + edge_type[i] + object_end)[metapath_temp['edge'][-1]])
+                    random_temp = random.choice(
+                        eval(object_start + edge_type[i] + object_end)[metapath_temp['edge'][-1]])
                     num_break = num_break + 1
                     if num_break >= 10:
                         random_temp = 'NONE'
@@ -204,4 +209,4 @@ class yelp_metapath:
         self.train_edge_format()
         print(len(self.train_edges))
         self.to_args()
-
+        return self.output_metapath

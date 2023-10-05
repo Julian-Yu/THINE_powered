@@ -4,18 +4,31 @@ import numpy as np
 import sys
 import random
 
+
+def ex(x):
+    if isinstance(x, tuple):
+        y = x
+        x = x[0]
+        print(f"{x} is tuple, len is f{len(y)}")
+    elif isinstance(x, list):
+        y = x
+        x = x[0]
+        print(f"{x} is list, len is f{len(y)}")
+    return x
+
+
 class mtne_metapath_dataset(Dataset):
     def __init__(self, args, metapath_data, train_edge):
         self.args = args
         self.metapath_data = metapath_data
-        self.train_edge = train_edge     # [[node, type, node, type, time], ...]
+        self.train_edge = train_edge  # [[node, type, node, type, time], ...]
         random.shuffle(self.train_edge)
         self.data_size = len(self.train_edge)
         self.closest_metapath = self.args.closest_metapath
         self.neg_sample = self.args.negative_sample
         self.neg_method = self.args.negative_sample_method
         self.node_type = self.args.node_type
-        self.node_dim = self.args.node_dim # {node type: , ...}
+        self.node_dim = self.args.node_dim  # {node type: , ...}
         self.metapath_type = self.args.metapath_type
 
         self.max_time = -sys.maxsize
@@ -38,8 +51,12 @@ class mtne_metapath_dataset(Dataset):
         negative_s_node = self.fun_negative_sample([s_node, s_type], [t_node, t_type])
         negative_s_metapath = {}
         for negative_node_temp in negative_s_node:
-            negative_s_metapath[negative_node_temp[1] + negative_node_temp[0]] = self.choice_metapath(s_node, s_type, negative_node_temp[0],
-                                                                              negative_node_temp[1], s_t_time, self.closest_metapath)
+            negative_s_metapath[negative_node_temp[1] + negative_node_temp[0]] = self.choice_metapath(s_node, s_type,
+                                                                                                      negative_node_temp[
+                                                                                                          0],
+                                                                                                      negative_node_temp[
+                                                                                                          1], s_t_time,
+                                                                                                      self.closest_metapath)
 
         # source_node:         [id, type]
         # target_node:         [id, type]
@@ -50,12 +67,12 @@ class mtne_metapath_dataset(Dataset):
         # negative_t_node:     [[id, type], ...]
         # negative_t_metapath: { id: [{type:, edge:, node type:, time: }, ...], ...}
         sample = {
-            'source_node':[s_node, s_type],
-            'target_node':[t_node, t_type],
-            'train_time':s_t_time,
-            'metapath_s':metapath_s,
-            'negative_s_node':negative_s_node,
-            'negative_s_metapath':negative_s_metapath
+            'source_node': [s_node, s_type],
+            'target_node': [t_node, t_type],
+            'train_time': s_t_time,
+            'metapath_s': metapath_s,
+            'negative_s_node': negative_s_node,
+            'negative_s_metapath': negative_s_metapath
         }
 
         # print(sample)
@@ -67,7 +84,9 @@ class mtne_metapath_dataset(Dataset):
         output_metapath = []
         for id_metapath_temp in self.node_metapath_data[dict_key]:
             # print(id_metapath_temp)
-            if int(id_metapath_temp[2]) <= int(time) and id_metapath_temp[4] == t_node and id_metapath_temp[5] == t_node_type:
+            if (int(id_metapath_temp[2]) <= int(time) and
+                    id_metapath_temp[4] == t_node and
+                    id_metapath_temp[5] == t_node_type):
                 node_metapath.append(id_metapath_temp)
             if len(node_metapath) > closest_metapath:
                 node_metapath.sort(key=functools.cmp_to_key(self.cmp))
@@ -108,7 +127,8 @@ class mtne_metapath_dataset(Dataset):
                     if dict_key not in self.node_metapath_data.keys():
                         self.node_metapath_data[dict_key] = []
                     self.node_metapath_data[dict_key].append([metapath_type_temp, metapath_temp['id'], max_time,
-                                                              avg_time, metapath_temp['edge'][index + 1], metapath_temp['node_type'][index + 1]])
+                                                              avg_time, metapath_temp['edge'][index + 1],
+                                                              metapath_temp['node_type'][index + 1]])
 
     def max_average_time(self, time_list):
         max_time = -sys.maxsize
@@ -129,7 +149,7 @@ class mtne_metapath_dataset(Dataset):
                 node_id = np.random.randint(1, self.node_dim[np.array(self.node_type)[node_type_index]], 1)
                 while (
                         (str(node_id[0]) == s_node[0] and np.array(self.node_type)[node_type_index] == s_node[1])
-                        or(str(node_id[0]) == t_node[0] and np.array(self.node_type)[node_type_index] == t_node[1])
+                        or (str(node_id[0]) == t_node[0] and np.array(self.node_type)[node_type_index] == t_node[1])
                 ):
                     node_type_index = np.random.randint(0, len(self.node_type) - 1, 1)
                     node_type_index = node_type_index[0]
@@ -141,9 +161,6 @@ class mtne_metapath_dataset(Dataset):
             node_type = t_node[1]
             node_id = np.random.randint(1, self.node_dim[node_type], self.neg_sample)
             for node_id_temp in node_id:
-                negative_node.append([str(node_id_temp) ,node_type])
+                negative_node.append([str(node_id_temp), node_type])
 
         return negative_node
-
-
-

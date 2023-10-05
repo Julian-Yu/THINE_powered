@@ -17,6 +17,7 @@ def my_cmp(x, y):
         return 1
     return 0
 
+
 class Evaluation:
     def __init__(self, embeddings):
         self.embeddings = embeddings
@@ -93,7 +94,7 @@ class Evaluation:
                 similarity = -((s_emb - t_emb) ** 2).sum()
 
                 if len(out_nodes) < top_num:
-                    out_nodes.append([i+1, similarity])
+                    out_nodes.append([i + 1, similarity])
                 else:
                     if similarity > out_nodes[-1][1]:
                         del out_nodes[-1]
@@ -103,10 +104,10 @@ class Evaluation:
         return [str(x[0]) for x in out_nodes]
 
     def get_precision_recall(self, t_pre, t_node):
-        tp_num = set(t_pre)&set(t_node)
+        tp_num = set(t_pre) & set(t_node)
         pre = float(len(tp_num) / len(t_pre))
         rec = float(len(tp_num) / len(t_node))
-        return pre,rec
+        return pre, rec
 
     def link_recommendation(self, top_num):
         link_rec_file = './input/user_rec.txt'
@@ -114,20 +115,21 @@ class Evaluation:
         recall_list = []
         with open(link_rec_file, 'r', encoding='utf-8') as f:
             data_line = f.readline()
-            while(data_line):
+            while (data_line):
                 data_line = data_line.split()
                 s_node = data_line[0]
                 t_node = data_line[1].split(',')
                 t_pre = self.get_rec_node(s_node, top_num)
-                pre_temp,rec_temp = self.get_precision_recall(t_pre, t_node)
+                pre_temp, rec_temp = self.get_precision_recall(t_pre, t_node)
                 precision_list.append(pre_temp)
                 recall_list.append(rec_temp)
                 data_line = f.readline()
         precision_np = np.array(precision_list)
         recall_np = np.array(recall_list)
-        print('Top@',top_num)
+        print('Top@', top_num)
         print('precision : ', precision_np.mean())
         print('recall : ', recall_np.mean())
+
 
 def read_embedding():
     input_file = './output/'
@@ -146,7 +148,8 @@ def read_embedding():
     embeddings = np.array(embeddings, dtype=float)
     return embeddings
 
-if __name__ =='__main__':
+
+if __name__ == '__main__':
     emb = read_embedding()
     evalu_temp = Evaluation(emb)
     # evalu_temp.link_recommendation(10)
